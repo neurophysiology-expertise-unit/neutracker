@@ -12,19 +12,12 @@ import cv2
 from natsort import natsorted 
 #import matplotlib.pyplot as plt
 # Qt imports
-try:
-    from PyQt5.QtWidgets import (QApplication,
-                                 QDockWidget,
-                                 QVBoxLayout,
-                                 QMainWindow,
-                                 QFileDialog)
-    from PyQt5.QtCore import Qt
-except:
-    from PyQt4.QtGui import (QWidget,
+from PyQt5.QtWidgets import (QApplication,
                              QDockWidget,
-                             QApplication,
+                             QVBoxLayout,
+                             QMainWindow,
                              QFileDialog)
-    from PyQt4.QtCore import Qt
+from PyQt5.QtCore import Qt
 
 import pylab as plt
 plt.matplotlib.style.use('ggplot')
@@ -94,6 +87,7 @@ class MPTrackerWindow(QMainWindow):
         self.results['ellipsePix'].fill(np.nan)
         self.results['pupilPix'].fill(np.nan)
         self.results['crPix'].fill(np.nan)
+        self.results['image_shape'] = self.imgstack.get(0).shape
         if not len(self.tracker.ROIpoints) >= 4:
             self.cropPoints = []
         else:
@@ -109,7 +103,7 @@ class MPTrackerWindow(QMainWindow):
         self.tabs.append(QDockWidget("Parameters",self))
         layout = QVBoxLayout()
         self.display = MptrackerDisplay(self.tracker.img,
-                                        runFunct = self.runDetectionVerbose)
+                                        runFunct = self.runAnalysis)
         self.paramwidget = MptrackerParameters(self.tracker,
                                                self.imgstack.get(0),
                                                eyewidget = self.display.roi_selection)
@@ -141,7 +135,7 @@ class MPTrackerWindow(QMainWindow):
         self.wFrame.mouseDoubleClickEvent = self.setStartFrame
         self.paramwidget.update = self.updateParam
         # window geometry
-        self.setWindowTitle('mOUSEpUPILtracker')
+        self.setWindowTitle('neutracker')
         self.show()
         self.running = False
 
@@ -234,6 +228,12 @@ class MPTrackerWindow(QMainWindow):
         else:
             print(e.key())
 
+    def runAnalysis(self):
+        if self.display.wParallel.isChecked():
+            self.runParallel()
+        else:
+            self.runDetectionVerbose()
+
     def runParallel(self):
         from .io import TiffFileSequence
         seq = self.imgstack
@@ -245,23 +245,34 @@ class MPTrackerWindow(QMainWindow):
             return
         if not self._initResults():
             return
-        from .parutils import par_process_tiff
-        print('Starting the parallel run.')
-        res = par_process_tiff(seq.filenames,self.tracker.parameters)
+        
+        # Status update
+        original_title = self.windowTitle()
+        self.setWindowTitle("neutracker - PARALLEL PROCESSING IN PROGRESS... PLEASE WAIT")
+        self.display.wNFrames.setText("PARALLEL RUNNING...")
+        self.app.processEvents()
 
-        self.results['ellipsePix'][:,:2] = np.array([r[2] for r in res])
-        self.results['ellipsePix'][:,2:] = np.array([r[3] for r in res])
-        self.results['pupilPix'][:,:] = np.array([r[1] for r in res],
-                                                 dtype=np.float32)
-        self.results['crPix'][:,:] = np.array([r[0] for r in res],
-                                              dtype = np.float32)
-        for i in range(2):
-            nanidx = find_outliers(self.results['pupilPix'][:,i])
-            if len(nanidx):
-                print('Removing {0} outliers.'.format(len(nanidx)))
-            self.results['ellipsePix'][nanidx,:] = np.nan
-            self.results['pupilPix'][nanidx,:] = np.nan
-        self.saveResults()
+        try:
+            from .parutils import par_process_tiff
+            print('Starting the parallel run.')
+            res = par_process_tiff(seq.filenames,self.tracker.parameters)
+    
+            self.results['ellipsePix'][:,:2] = np.array([r[2] for r in res])
+            self.results['ellipsePix'][:,2:] = np.array([r[3] for r in res])
+            self.results['pupilPix'][:,:] = np.array([r[1] for r in res],
+                                                     dtype=np.float32)
+            self.results['crPix'][:,:] = np.array([r[0] for r in res],
+                                                  dtype = np.float32)
+            for i in range(2):
+                nanidx = find_outliers(self.results['pupilPix'][:,i])
+                if len(nanidx):
+                    print('Removing {0} outliers.'.format(len(nanidx)))
+                self.results['ellipsePix'][nanidx,:] = np.nan
+                self.results['pupilPix'][nanidx,:] = np.nan
+            self.saveResults()
+        finally:
+            self.setWindowTitle(original_title)
+            self.display.wNFrames.setText("Done")
 
     
     def _initResults(self):
@@ -315,13 +326,18 @@ The order matters, the first and third points are the edges of the eye.''')
                 self.resultfile = str(QFileDialog().getSaveFileName()[0])
             except:
                 self.resultfile = None
+        if not self.resultfile is None:
+             fname,ext = os.path.splitext(str(self.resultfile))
+             if not len(ext):
+                 self.resultfile = fname + '.hdf5'
+        
         self.resultfile = str(self.resultfile)
         res = exportResultsToHDF5(self.resultfile,
                                   self.parameters,
                                   self.results)
         fname,ext = os.path.splitext(self.resultfile)
-        if not len(ext):
-            self.resultfile = None
+        #if not len(ext):
+        #    self.resultfile = None
         if not res is None:
             print("Saved to " + self.resultfile)
 
@@ -334,6 +350,7 @@ def main():
     parser.add_argument('target',
                         metavar = 'target',
                         type = str,
+                        nargs = '?',
                         help = 'Experiment data path.')
     parser.add_argument('-o','--output',
                         type = str,
@@ -347,7 +364,7 @@ def main():
 
     app = QApplication(sys.argv)
     target = None
-    if os.path.isfile(args.target) or '*' in args.target:
+    if args.target and (os.path.isfile(args.target) or '*' in args.target):
         target = args.target
     params = None
 

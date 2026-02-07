@@ -1,0 +1,8 @@
+{
+    "threshold": 50,
+    "minPupilArea": 0.001,
+    "maxPupilArea": 0.5,
+    "invertThreshold": false,
+    "filterType": "gaussian",
+    "filterSize": 5
+}

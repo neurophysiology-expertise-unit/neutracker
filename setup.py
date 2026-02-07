@@ -8,20 +8,20 @@ from setuptools import setup
 longdescription = '''Mouse pupil tracker GUI and tools.'''
 
 setup(
-    name = 'mptracker',
-    version = '0.1',
-    author = 'Joao Couto',
-    author_email = 'jpcouto@gmail.com',
-    description = (' mOUSEpUPILtracker'),
+    name = 'neutracker',
+    version = '0.2.0',
+    author = 'Cagatay Aydin',
+    author_email = 'cagjony@gmail.com',
+    description = (' Mouse Pupil Tracker'),
     long_description = longdescription,
     license = 'GPL',
-    packages = ['mptracker'],
+    packages = ['neutracker'],
     install_requires=[
           'tifffile'
       ],
     entry_points = {
         'console_scripts': [
-            'mptracker-gui = mptracker.gui:main',
+            'neutracker-gui = neutracker.gui:main',
             ]
         }
     )

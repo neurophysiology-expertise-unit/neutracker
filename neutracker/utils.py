@@ -57,12 +57,17 @@ def computePupilDiameterFromEllipse(ellipsePix,
                              polyorder = 1, mode='nearest')
     
 def computeConversionFactor(ref,estimate = 6.0):
+    if ref is None or len(ref) < 2:
+        return 1.0
     return float(estimate)/np.sqrt(np.diff([ref[0][0],ref[1][0]])**2. + np.diff([ref[0][1],ref[1][1]])**2.)
 
 def convertPixelToEyeCoords(pupilPix,
                             eyeCorners,
                             crPix = None,
                             eyeDiameterEstimate = 3.0):
+    if eyeCorners is None or len(eyeCorners) < 2:
+        return np.full_like(pupilPix[:,0], np.nan), np.full_like(pupilPix[:,0], np.nan), np.full_like(pupilPix[:,0], np.nan)
+
     reference = [eyeCorners[0][0] +
                  np.diff([eyeCorners[0][0],eyeCorners[1][0]])/2.,
                  eyeCorners[0][1] +

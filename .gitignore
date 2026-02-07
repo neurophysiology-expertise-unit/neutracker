@@ -3,3 +3,27 @@
 *.pyc
 *~
 *.egg-info
+__pycache__/
+
+# Documentation / Sphinx
+_build/
+
+# Packaging
+dist/
+build/
+*.spec
+
+# Test / Generated Data
+test.avi
+test_tif/
+*.hdf5
+*.json
+!neutracker/*.json
+!tests/*.json
+
+# IDEs
+.vscode/
+.idea/
+
+# Notebooks
+notebooks/

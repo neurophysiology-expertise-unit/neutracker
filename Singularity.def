@@ -1,0 +1,21 @@
+Bootstrap: docker
+From: mambaorg/micromamba:latest
+
+%files
+    environment.yml /tmp/env.yaml
+    . /app
+
+%post
+    # Install dependencies
+    micromamba install -y -n base -f /tmp/env.yaml
+    micromamba clean --all --yes
+    
+    # Install package
+    cd /app
+    /opt/conda/bin/pip install .
+
+%runscript
+    # Activate environment usually handled by micromamba entrypoint in Docker, 
+    # but here we might need explicit activation or use the python path.
+    # Assuming base env.
+    exec /opt/conda/bin/neutracker-cli "$@"

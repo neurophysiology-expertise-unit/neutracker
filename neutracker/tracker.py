@@ -5,7 +5,7 @@ import numpy as np
 import cv2
 from .utils import *
 import os
-mptracker_ellipse_tickness = 1
+neutracker_ellipse_tickness = 1
 
 def ellipseToContour(pupil_pos,a,b,phi,R=np.linspace(0,2.1*np.pi, 20)):
     xx = pupil_pos[1] + a*np.cos(R)*np.cos(phi) - b*np.sin(R)*np.sin(phi)
@@ -230,7 +230,7 @@ def extractPupilShapeAnalysis(img,params,
             outimg = cv2.drawContours(outimg,
                                         [contours[idx]], -1, (100, 225, 100),1)
             cv2.ellipse(outimg,ellipse,(50,150,250),
-                        mptracker_ellipse_tickness,cv2.LINE_AA)
+                        neutracker_ellipse_tickness,cv2.LINE_AA)
             # Absolute positions
             pupil_pos = np.array([ellipse[0][0],ellipse[0][1]])
             short_axis = ellipse[1][0]
@@ -267,7 +267,9 @@ class MPTracker(object):
         'points':[],
         'invertThreshold':False,
         'eye_radius_mm':1.8, #this was set to 3*0.8 in the matlab version
+        'fov_mm':0.0, # Field of View width in mm (0 = unknown/unused)
         'number_frames':0,
+        'crTrack': True,
     }
     def __init__(self,parameters = None, drawProcessedFrame=False):
         if parameters is None:

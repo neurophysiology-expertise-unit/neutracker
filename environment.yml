@@ -1,0 +1,24 @@
+name: neutracker
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - python>=3.10
+  - pip
+  - numpy
+  - scipy
+  - matplotlib
+  - opencv
+  - h5py
+  - pyqt
+  - pims
+  - tifffile
+  - natsort
+  - tqdm
+  - pyqtgraph
+  - pip:
+    - decord
+    - pyinstaller
+    - imageio
+    - slicerator
+    - pillow

@@ -49,7 +49,8 @@ Process a set of tiff files in parallel given tracker parameters
                 pbar.update((ntasks - rs._number_left) - pbar.n)
     rs.wait()
     pool.join()
-    res = np.vstack(res)
+    # Flatten the list of lists
+    res = [item for sublist in res for item in sublist]
     
     if verbose:
         toc = tic() - ts

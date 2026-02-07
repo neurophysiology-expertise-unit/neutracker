@@ -37,7 +37,8 @@ class MptrackerDisplay(QWidget):
         if not runFunct is None:
             runbutton = QPushButton('Run')
             runbutton.clicked.connect(runFunct)
-            grid.addRow(runbutton)
+            self.wParallel = QCheckBox('Parallel')
+            grid.addRow(runbutton, self.wParallel)
         self.wFrame = QSlider(Qt.Horizontal)
         self.wFrame.valueChanged.connect(self.processFrame)
         self.wFrame.setMaximum(1)
@@ -257,7 +258,7 @@ class MptrackerParameters(QWidget):
 
         self.wRoundIndex = QTextEdit(str(self.parameters['roundIndex']))
         self.wRoundIndex.setMaximumHeight(25)
-        self.wRoundIndex.setMaximumWidth(40)
+        self.wRoundIndex.setMaximumWidth(60)
         self.wRoundIndex.textChanged.connect(self.setRoundIndex)
         pGrid3.addRow(QLabel('Circle threshold:'),self.wRoundIndex)
 
@@ -339,9 +340,18 @@ class MptrackerParameters(QWidget):
         
         self.wEyeRadius = QTextEdit(str(self.parameters['eye_radius_mm']))
         self.wEyeRadius.setMaximumHeight(25)
-        self.wEyeRadius.setMaximumWidth(40)
+        self.wEyeRadius.setMaximumWidth(60)
         self.wEyeRadius.textChanged.connect(self.setEyeRadius)
         self.pGridSave.addRow(QLabel('Approximate eye radius (mm):'),self.wEyeRadius)
+
+        # Field of View Width (mm)
+        self.wFOV = QTextEdit(str(self.parameters.get('fov_mm', 0.0)))
+        self.wFOV.setMaximumHeight(25)
+        self.wFOV.setMaximumWidth(60)
+        self.wFOV.textChanged.connect(self.setFOV)
+        self.pGridSave.addRow(QLabel('Image Field of View width (mm):'),self.wFOV)
+
+
 
 
         self.wDisplayBinaryImage = QCheckBox()
@@ -471,6 +481,12 @@ class MptrackerParameters(QWidget):
             print(self.tracker.parameters['eye_radius_mm'])
         except:
             print('Need to insert a float in the radius.')
+    def setFOV(self):
+        value = self.wFOV.toPlainText()
+        try:
+            self.parameters['fov_mm'] = float(value)
+        except:
+            pass
         '''
     def selectPoints(self,event):
         pt = self.wROIview.mapToScene(event.pos())

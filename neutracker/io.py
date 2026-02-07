@@ -32,7 +32,7 @@ class JsonEncoder(json.JSONEncoder):
             return super(JsonEncoder, self).default(obj)
 
 def createResultsFile(filename,nframes,npoints = 4,MPIO = False):
-    if not os.path.isdir(os.path.dirname(filename)):
+    if len(os.path.dirname(filename)) > 0 and not os.path.isdir(os.path.dirname(filename)):
         os.makedirs(os.path.dirname(filename))
     import h5py as h5
     if MPIO:
@@ -65,14 +65,30 @@ def exportResultsToHDF5(resultfile,
     '''
     fname,ext = os.path.splitext(resultfile)
     if len(ext)==0:
-        print('File has no extension:'+resultfile + ' Crack...')
-        return None
+        resultfile += '.hdf5'
     if os.path.isfile(resultfile):
         print('Overwriting file: {0}'.format(resultfile))
     diam = computePupilDiameterFromEllipse(
         results['ellipsePix'],
         computeConversionFactor(results['reference'],
                                 2.*parameters['eye_radius_mm']))
+    if parameters.get('fov_mm', 0) > 0:
+        # If FOV is provided in mm (e.g. 300mm for 30cm arena)
+        # Calculate conversion factor as mm_per_pixel
+        # image_shape is (height, width)
+        if 'image_shape' in results:
+            img_width = results['image_shape'][1]
+            cFactor = parameters['fov_mm'] / float(img_width)
+            print(f'Using FOV {parameters["fov_mm"]}mm -> {cFactor:.4f} mm/px')
+            # Recalculate diameter with new factor
+            diam = computePupilDiameterFromEllipse(
+                results['ellipsePix'],
+                cFactor)
+        else:
+             print("Warning: FOV set but image_shape not found in results. Using default calibration.")
+             cFactor = computeConversionFactor(results['reference'],
+                                    2.*parameters['eye_radius_mm'])
+
     if parameters['crTrack']:
         az,el,theta = convertPixelToEyeCoords(results['pupilPix'],
                                               results['reference'],
@@ -94,6 +110,19 @@ def exportResultsToHDF5(resultfile,
     fd['azimuth'][:] = az.astype(np.float32)
     fd['elevation'][:] = el.astype(np.float32)
     fd['theta'][:] = theta.astype(np.float32)
+    
+    # Save position_mm if FOV is provided
+    if parameters.get('fov_mm', 0) > 0 and 'image_shape' in results:
+        img_width = results['image_shape'][1]
+        cFactor = parameters['fov_mm'] / float(img_width)
+        # positionPix is (y, x) or (x, y)? 
+        # tracker.py: pupil_pos = np.array([ellipse[0][0],ellipse[0][1]]) -> (x, y)
+        # so we just multiply by cFactor
+        pos_mm = results['pupilPix'] * cFactor
+        if 'position_mm' not in fd:
+             fd.create_dataset('position_mm', dtype=np.float32, shape=(len(diam), 2), compression='gzip')
+        fd['position_mm'][:] = pos_mm.astype(np.float32)
+
     fd['pointsPix'][:] = np.array(parameters['points'])
     fd.flush()
     fd.close()

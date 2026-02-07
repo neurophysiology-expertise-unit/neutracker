@@ -1,0 +1,59 @@
+Bootstrap: docker
+From: continuumio/miniconda3
+
+%labels
+    Author Cagatay Aydin
+    Version 0.2.0
+
+%files
+    environment.yml /app/environment.yml
+    neutracker /app/neutracker
+    setup.py /app/setup.py
+    run_cli.py /app/run_cli.py
+
+%post
+    # Install system libraries required by OpenCV and Qt (headless)
+    apt-get update && apt-get install -y \
+        libgl1-mesa-glx \
+        libegl1-mesa \
+        libxrandr2 \
+        libxrandr2 \
+        libxss1 \
+        libxcursor1 \
+        libxcomposite1 \
+        libasound2 \
+        libxi6 \
+        libxtst6 \
+        ffmpeg
+
+    # Create the conda environment
+    cd /app
+    /opt/conda/bin/conda env create -f environment.yml
+
+    # Install the package in editable mode within the environment
+    # We need to leverage conda run to execute pip inside the env
+    /opt/conda/bin/conda run -n neutracker pip install -e .
+
+    # Clean up
+    apt-get clean
+    rm -rf /var/lib/apt/lists/*
+
+%environment
+    # Set up the shell environment to activate the conda env automatically
+    export PATH=/opt/conda/envs/neutracker/bin:$PATH
+
+%runscript
+    # The entry point for the container
+    # This matches the user request to run the CLI version
+    exec python /app/run_cli.py "$@"
+
+%help
+    This container runs the Neutracker CLI.
+    
+    Usage:
+        apptainer run neutracker.sif [options] <input_file>
+        
+    Options:
+        --params <json_file>: Path to parameters file (required)
+        --output <file>: Path to output HDF5
+        --parallel: Enable parallel processing

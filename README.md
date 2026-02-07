@@ -1,8 +1,11 @@
-mOUSEpUPILtracker
-================
+Neutracker
+==========
 
-A mouse pupil tracker using Python and OpenCV.
-This can process 5 min of recording in around 10 seconds (on a laptop).
+**Neutracker** is a modernized version of the [mptracker](https://github.com/jpcouto/mptracker) repository, originally by Joao Couto. It has been updated to include:
+- **Windows Executable**: Standalone `.exe` for easy deployment.
+- **Headless CLI**: Command-line interface for batch processing and HPC environments.
+- **Containerization**: Docker and Singularity/Apptainer support.
+- **Modern Packaging**: `pyproject.toml` and `environment.yml` for reproducible builds.
 
 Help making it work for your dataset by letting me know cases where it fails/works.
 
@@ -35,10 +38,10 @@ In MATLAB do for example: `diam = h5read('filename.something','/diameter')`
 Usage (GUI):
 ------------
 
-**NOTE**: ``mptracker-gui --help`` for options.
+**NOTE**: ``neutracker-gui --help`` for options.
 
 
-Launch the GUI from the command line: ``mptracker-gui <filename>``. The filename is that of a seq file or one of the TIFF files in a TIFF sequence.  
+Launch the GUI from the command line: ``neutracker-gui <filename>``. The filename is that of a seq file or one of the TIFF files in a TIFF sequence.  
 ### Instructions:
 
 1.   Select left corner; top; right corner and bottom of the eye by dragging the points (keep the arangement between points the same as default).
@@ -61,26 +64,27 @@ Dependencies:
 
 - PyQt5
 - pyqtgraph
-- opencv 3.0 (cv2)
+- opencv (cv2)
 - h5py
 - PIMS (for reading norpix seq files)
-- libtiff
+- tifffile
 - natsort
-- numpy, scipy, matplotlib, shutil
+- numpy, scipy, matplotlib
+- imageio, slicerator, pillow
+
 ### Install instructions:
 
-1. Get [ miniconda ](https://conda.io/miniconda.html) (e.g. Python 3.7 x64) 
-2. ``conda install pyqt h5py scipy numpy matplotlib``
-3. ``conda install -c conda-forge tifffile``
-4. ``conda install -c menpo opencv3``
-5. ``pip install pims pyqtgraph tqdm natsort``
-6. Clone the repositoty: ``git clone https://bitbucket.org/jpcouto/mptracker.git``
-7. Go into that folder``cd mptracker`` and finally ``python setup.py develop``
-
-**Note:** On windows I suggest getting the [ git bash terminal ](https://git-scm.com/downloads); Installing Anaconda as system python will make your life easier...
+1. Get [ miniconda ](https://conda.io/miniconda.html)
+2. Create environment: ``conda env create -f environment.yml``
+3. Activate: ``conda activate neutracker``
+4. Install: ``pip install .``
+5. **Important**: Ensure PyQt5 is installed via pip for proper EXE building:
+   ```bash
+   pip install PyQt5 pyqtgraph
+   ```
 
 **Please let me know whether this works for you and acknowledge if you use it in a publication.**
 
-**Joao Couto** - *jpcouto@gmail.com*
+**Cagatay Aydin** - *cagjony@gmail.com*
 
-November 2016
+February 2026
