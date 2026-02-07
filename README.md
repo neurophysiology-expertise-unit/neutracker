@@ -29,7 +29,8 @@ The file is organized as follows:
 - **/elevation** - elevation of the pupil [estimated degrees]
 - */theta* - angle 
 - */ellipsePix* - ellipse parameters for each frame [in pixels] [short_axis,long_axis,a,b,phi]
-- */positionPix* - position of the eye in pixels
+- */positionPix* - position of the eye in pixels (X, Y)
+- **/position_mm** - position of the eye in mm (X, Y) [Only if FOV is provided]
 - */crPix* - position of the corneal reflexion in pixels
 - *points* - points marked by the user (left eye corner, top of the eye, right eye corner, bottom of the eye). These points mark the area to be analysed and define the scale.
 
@@ -56,6 +57,19 @@ For other key options press the *h* key
 
 - *-o* <output file path> File where to save the results to (will ask if not specified).
 - *-p* <parameter file> Parameter file to load.
+- *--parallel* Run in parallel (CLI only).
+
+### Apptainer / Singularity:
+
+A definition file `neutracker.def` is provided for building a Singularity container.
+
+```bash
+# Build
+apptainer build neutracker.sif neutracker.def
+
+# Run
+apptainer run neutracker.sif input.avi --params params.json
+```
 
 
 Installation:
