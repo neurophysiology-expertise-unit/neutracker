@@ -92,10 +92,30 @@ Dependencies:
 2. Create environment: ``conda env create -f environment.yml``
 3. Activate: ``conda activate neutracker``
 4. Install: ``pip install .``
-5. **Important**: Ensure PyQt5 is installed via pip for proper EXE building:
-   ```bash
-   pip install PyQt5 pyqtgraph
-   ```
+
+### Micromamba (Faster Alternative):
+
+1. Create environment: ``micromamba create -f environment.yml``
+2. Activate: ``micromamba activate neutracker``
+3. Install: ``pip install .``
+
+### Testing / Generating Data:
+
+To verify the installation or the container build, you can generate synthetic data and run a test analysis.
+
+```bash
+# 1. Generate synthetic data (test_synthetic.avi)
+# Using local python:
+python3 tests/generate_synthetic_data.py test_synthetic.avi
+# OR using Apptainer:
+apptainer exec neutracker.sif python3 tests/generate_synthetic_data.py test_synthetic.avi
+
+# 2. Run the analysis
+# Using local install:
+neutracker-gui test_synthetic.avi
+# OR using Apptainer (headless):
+apptainer run neutracker.sif test_synthetic.avi --params tests/test_params.json
+```
 
 **Please let me know whether this works for you and acknowledge if you use it in a publication.**
 
