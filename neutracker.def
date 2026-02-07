@@ -14,8 +14,8 @@ From: continuumio/miniconda3
 %post
     # Install system libraries required by OpenCV and Qt (headless)
     apt-get update && apt-get install -y \
-        libgl1-mesa-glx \
-        libegl1-mesa \
+        libgl1 \
+        libegl1 \
         libxrandr2 \
         libxrandr2 \
         libxss1 \

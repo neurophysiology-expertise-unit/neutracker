@@ -27,3 +27,7 @@ test_tif/
 
 # Notebooks
 notebooks/
+
+# System
+*.deb
+*.sif
