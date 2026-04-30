@@ -193,18 +193,26 @@ class TiffFileSequence(object):
         self.files = []
         framesPerFile = []
         for i,f in enumerate(self.filenames):
-            if i==0 or i== len(self.filenames)-1:
-                self.files.append(TiffFile(f))
-                self.compressedhack = False
-                try:
-                    N,h,w = self.files[i].series[0].shape
-                except:
-                    h,w = self.files[i].series[0].shape
-                    N = len(self.files[i].series)
-                    if N > 1:
-                        self.compressedhack = True
+            tf = TiffFile(f)
+            try:
+                N,h,w = tf.series[0].shape
+                is_compressedhack = False
+            except:
+                h,w = tf.series[0].shape
+                N = len(tf.series)
+                is_compressedhack = (N > 1)
+            
+            if i == 0:
+                self.compressedhack = is_compressedhack
+                self.files.append(tf)
+                self.h = h
+                self.w = w
+            elif i == len(self.filenames) - 1:
+                self.files.append(tf)
             else:
                 self.files.append(None)
+                tf.close()
+                
             framesPerFile.append(np.int64(N))
             if 'h' in dir(self):
                 if not self.h == h:

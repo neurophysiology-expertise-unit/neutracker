@@ -32,6 +32,34 @@ def tiff_sequence_to_avi(input_pattern, output_path, fps=30, v_max=255, logger=N
     if imgstack.nFrames == 0:
         raise FileNotFoundError(f"No frames found in: {input_pattern}")
 
+    # Check if target already exists with same number of frames
+    if os.path.exists(output_path):
+        try:
+            cap = cv2.VideoCapture(output_path)
+            existing_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+            cap.release()
+            
+            if existing_frames == imgstack.nFrames:
+                msg = f"Target video '{output_path}' already exists with matching frame count ({existing_frames}). Skipping conversion."
+                if logger:
+                    logger.info(msg)
+                else:
+                    print(msg)
+                imgstack.close()
+                return
+            else:
+                msg = f"Target video exists but frame count ({existing_frames}) does not match source ({imgstack.nFrames}). Overwriting."
+                if logger:
+                    logger.info(msg)
+                else:
+                    print(msg)
+        except Exception as e:
+            msg = f"Target video exists but could not verify frame count ({e}). Overwriting."
+            if logger:
+                logger.warning(msg)
+            else:
+                print(msg)
+
     if logger:
         logger.info(f"Found {imgstack.nFrames} total frames. Contrast: [0, {v_max}] -> [0, 255]")
     else:

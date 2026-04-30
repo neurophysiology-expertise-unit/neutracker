@@ -119,6 +119,8 @@ apptainer run neutracker.sif test_synthetic.avi --params tests/test_params.json
 
 **Please let me know whether this works for you and acknowledge if you use it in a publication.**
 
-**Cagatay Aydin** - *cagjony@gmail.com*
+*Modernized and enhanced through a collaboration between Cagatay Aydin and Antigravity.*
+
+If you have any questions, please email Cagatay - cagjony@gmail.com
 
 February 2026
