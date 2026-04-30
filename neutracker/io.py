@@ -261,7 +261,8 @@ class TiffFileSequence(object):
 
     def close(self):
         for fd in self.files:
-            fd.close()
+            if fd is not None:
+                fd.close()
 
 class NorpixFile(object):
     def __init__(self,targetpath = None,extension='tif'):
