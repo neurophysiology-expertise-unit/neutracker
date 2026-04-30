@@ -8,6 +8,15 @@
     {
       "input": "D:/esther/raw/ELS20_OND_P7/ELS20_OND_P7_E20.*",
       "output": "D:/esther/convert/"
+    },
+    {
+      "input": "D:/esther/raw/ELS21_OND_P7/ELS21_OND_P7_C21.*",
+      "output": "D:/esther/convert/",
+      "contrast": 60
+    },
+    {
+      "input": "D:/esther/raw/ELS21_OND_P7/ELS21_OND_P7_E21.*",
+      "output": "D:/esther/convert/"
     }
   ]
 }
