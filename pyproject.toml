@@ -31,4 +31,5 @@ dependencies = [
 
 [project.scripts]
 neutracker-gui = "neutracker.gui:main"
-neutracker-cli = "neutracker.cli:main" # Placeholder for the new CLI
+neutracker-cli = "neutracker.cli:main"
+neutracker     = "neutracker.cli:main"

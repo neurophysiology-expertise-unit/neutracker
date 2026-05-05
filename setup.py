@@ -22,6 +22,8 @@ setup(
     entry_points = {
         'console_scripts': [
             'neutracker-gui = neutracker.gui:main',
+            'neutracker-cli = neutracker.cli:main',
+            'neutracker     = neutracker.cli:main',
             ]
         }
     )
