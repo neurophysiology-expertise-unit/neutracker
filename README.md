@@ -53,11 +53,67 @@ Launch the GUI from the command line: ``neutracker-gui <filename>``. The filenam
 
 For other key options press the *h* key
 
-### Command line options:
+### Command line options (track):
 
 - *-o* <output file path> File where to save the results to (will ask if not specified).
 - *-p* <parameter file> Parameter file to load.
 - *--parallel* Run in parallel (CLI only).
+
+Usage (Convert):
+----------------
+
+The `convert` subcommand stitches a folder of multipage TIFF files into a single AVI video, or extracts frames from an AVI back into TIFFs. It is designed for batch processing large datasets.
+
+**Skip-if-complete**: If the output `.avi` already exists and its frame count matches the source TIFF sequence, the conversion is automatically skipped. If frame counts differ (incomplete previous run), the file is overwritten.
+
+### Single folder → AVI
+
+```bash
+neutracker convert /path/to/tiff_folder --output /path/to/output.avi
+```
+
+### Contrast stretching
+
+Use `--contrast` to clip and normalize pixel values before encoding. Useful for 16-bit or low-contrast acquisitions.
+
+```bash
+neutracker convert /path/to/tiff_folder --output /path/to/output.avi --contrast 60
+```
+
+### Batch mode via config file
+
+For processing many sessions at once, define a JSON config file:
+
+```json
+{
+  "conversions": [
+    {
+      "input": "D:/data/ELS20_OND_P7/ELS20_OND_P7_C20.*",
+      "output": "D:/data/convert/",
+      "contrast": 60
+    },
+    {
+      "input": "D:/data/ELS20_OND_P7/ELS20_OND_P7_E20.*",
+      "output": "D:/data/convert/",
+      "contrast": 60
+    }
+  ]
+}
+```
+
+Then run:
+
+```bash
+neutracker convert --config tests/convert_config.json
+```
+
+Each `input` supports glob patterns (e.g. `ELS20_OND_P7_C20.*`) to match multiple folders. The output folder name is derived automatically from the matched folder name. Each task is processed independently and skipped if the output AVI already matches the expected frame count.
+
+### AVI → TIFF sequence (reverse)
+
+```bash
+neutracker convert /path/to/input.avi --output /path/to/output_frames/
+```
 
 ### Apptainer / Singularity:
 
@@ -67,8 +123,11 @@ A definition file `neutracker.def` is provided for building a Singularity contai
 # Build
 apptainer build neutracker.sif neutracker.def
 
-# Run
+# Run tracking
 apptainer run neutracker.sif input.avi --params params.json
+
+# Run conversion
+apptainer exec neutracker.sif neutracker convert --config convert_config.json
 ```
 
 
